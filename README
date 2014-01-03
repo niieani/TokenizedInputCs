@@ -1,0 +1,9 @@
+Based on this:
+http://stackoverflow.com/questions/15167809/how-can-i-create-a-tagging-control-similar-to-evernote-in-wpf
+
+It's an equivalent of NSTokenField in Cocoa (OS X, iOS) for .NET.
+
+Features added:
+- Removing tags with backspace
+- Checking for duplicates
+- Editing with mouse click
