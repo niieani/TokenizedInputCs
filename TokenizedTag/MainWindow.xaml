@@ -1,0 +1,25 @@
+﻿<Window x:Class="TokenizedTag.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:TokenizedTag"
+        xmlns:s="clr-namespace:System;assembly=mscorlib"
+        Title="MainWindow" Height="350" Width="525">
+
+    <Window.DataContext>
+        <local:ViewModel />
+    </Window.DataContext>
+
+    <Grid>
+        <!-- todo: implement ICommand properties on TokenizedTagControl to allow easy binding to the viewmodel. Alternatively, the user could use a behavior to handle TagClick, and if necessary TagAdded/TagRemoved -->
+        <local:TokenizedTagControl x:Name="TagControl" ItemsSource="{Binding SelectedTags}" TagClick="TokenizedTagControl_TagClick" >
+            <!--<local:TokenizedTagControl.AllTags>
+                <s:String>read</s:String>
+                <s:String>receipt</s:String>
+                <s:String>recipe</s:String>
+                <s:String>research</s:String>
+                <s:String>restaurants</s:String>
+            </local:TokenizedTagControl.AllTags>-->
+        </local:TokenizedTagControl>
+    </Grid>
+</Window>
+    
