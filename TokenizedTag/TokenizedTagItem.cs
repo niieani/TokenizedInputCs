@@ -44,13 +44,31 @@ namespace TokenizedTag
             AutoCompleteBox inputBox = this.GetTemplateChild("PART_InputBox") as AutoCompleteBox;
             if (inputBox != null)
             {
-                inputBox.LostFocus += inputBox_LostFocus;
+                //inputBox.DropDownClosed +=inputBox_DropDownClosed;
+//                inputBox.SelectionChanged += inputBox_SelectionChanged;
+                inputBox.LostKeyboardFocus += inputBox_LostFocus; //GotFocus
+//                inputBox.LostFocus += inputBox_LostFocus;
                 inputBox.Loaded += inputBox_Loaded;
+                /*
+                inputBox.KeyDown += (s, e) =>
+                {
+                    switch (e.Key)
+                    {
+                        case (Key.Enter):  // accept tag
+                            var parent = GetParent();
+                            if (parent != null)
+                                parent.RaiseTagClick(this); // raise the TagClick event of the TokenizedTagControl
+                            break;
+                    }
+                };
+                 * */
             }
 
             Button btn = this.GetTemplateChild("PART_TagButton") as Button;
             if (btn != null)
             {
+                //btn.LostKeyboardFocus += inputBox_LostFocus;
+
                 btn.Loaded += (s, e) =>
                 {
                     Button b = s as Button;
@@ -62,29 +80,44 @@ namespace TokenizedTag
                     }
                 };
 
-                btn.Click += (s, e) =>
+                btn.Click += (s, e) => //btn.Click 
                 {
                     var parent = GetParent();
                     if (parent != null)
-                        parent.RaiseTagClick(this); // raise the TagClick event of the TokenizedTagControl
-                };
-                /*
-                btn.KeyDown += (s, e) =>
                     {
-                        switch (e.Key)
+                        parent.RaiseTagClick(this); // raise the TagClick event of the TokenizedTagControl
+
+                        if (parent.IsSelectable)
                         {
-                            case (Key.Enter):  // accept tag
-                                var parent = GetParent();
-                                if (parent != null)
-                                    parent.RaiseTagClick(this); // raise the TagClick event of the TokenizedTagControl
-                                break;
+                            //e.Handled = true;
+                            parent.SelectedItem = this;
                         }
-                    };
-                 **/
+                        //parent.SelectedItem = this;
+                    }
+                    //PART_TagBorder
+                };
+
+                btn.MouseDoubleClick += (s, e) =>
+                {
+                    var parent = GetParent();
+                    if (parent != null)
+                    {
+                        parent.RaiseTagDoubleClick(this); // raise the TagClick event of the TokenizedTagControl
+
+                        if (parent.IsSelectable)
+                        {
+                            //e.Handled = true;
+                            parent.SelectedItem = this;
+                        }
+                    }
+                        
+                };
+
             }
 
             base.OnApplyTemplate();
         }
+
 
         /// <summary>
         /// Handles the click on the delete glyph of the tag button.
@@ -101,10 +134,10 @@ namespace TokenizedTag
             e.Handled = true; // bubbling would raise the tag click event
         }
 
-        bool isDuplicate(TokenizedTagControl tagControl, string compareTo)
+        static bool isDuplicate(TokenizedTagControl tagControl, string compareTo)
         {
             var duplicateCount = (from TokenizedTagItem item in (IList)tagControl.ItemsSource
-                                   where item.Text == this.Text
+                                   where item.Text.ToLower() == compareTo.ToLower()
                                    select item).Count();
             if (duplicateCount > 1)
                 return true;
@@ -120,12 +153,23 @@ namespace TokenizedTag
         void inputBox_Loaded(object sender, RoutedEventArgs e)
         {
             AutoCompleteBox acb = sender as AutoCompleteBox;
+            
             if (acb != null)
             {
                 var tb = acb.Template.FindName("Text", acb) as TextBox;
+
                 if (tb != null)
                     tb.Focus();
-
+                /*
+                acb.SelectionChanged += (s, e1) =>
+                {
+                    var parent = GetParent();
+                    if (parent != null)
+                    {
+                        parent.InitializeNewTag();
+                    }
+                };
+                */
                 // PreviewKeyDown, because KeyDown does not bubble up for Enter
                 acb.PreviewKeyDown += (s, e1) =>
                 {
@@ -135,20 +179,19 @@ namespace TokenizedTag
                         switch (e1.Key)
                         {
                             case (Key.Enter):  // accept tag
-                                //var duplicateExists = (from TokenizedTagItem item in (IList)parent.ItemsSource
-                                //                       where item.Text == this.Text
-                                //                       select item).Count();
-                                //if (duplicateExists > 1)
-                                if (isDuplicate(parent, this.Text))
-                                    break;
                                 if (!string.IsNullOrWhiteSpace(this.Text))
-                                    parent.OnApplyTemplate(); //creates another tag
+                                {
+                                    if (isDuplicate(parent, this.Text))
+                                        break;
+                                    parent.OnApplyTemplate(this);
+                                    parent.SelectedItem = parent.InitializeNewTag();//creates another tag
+                                }
                                 else
                                     parent.Focus();
                                 break;
                             case (Key.Escape): // reject tag
                                 parent.Focus();
-                                parent.RemoveTag(this, true); // do not raise RemoveTag event
+                                //parent.RemoveTag(this, true); // do not raise RemoveTag event
                                 break;
                             case (Key.Back):
                                 if (string.IsNullOrWhiteSpace(this.Text))
@@ -156,6 +199,7 @@ namespace TokenizedTag
                                     inputBox_LostFocus(this, new RoutedEventArgs());
                                     var previousTagIndex = ((IList)parent.ItemsSource).Count - 1;
                                     if (previousTagIndex < 0) break;
+
                                     //parent.RemoveTag((((IList)parent.ItemsSource)[previousTagIndex] as TokenizedTagItem));
                                     var previousTag = (((IList)parent.ItemsSource)[previousTagIndex] as TokenizedTagItem);
                                     previousTag.Focus();
@@ -185,15 +229,36 @@ namespace TokenizedTag
                     if (isDuplicate(parent, this.Text))
                         parent.RemoveTag(this, true); // do not raise RemoveTag event
                 }
-                this.IsEditing = false;
+                if (!(sender as AutoCompleteBox).IsDropDownOpen)
+                {
+                    this.IsEditing = false;
+                    //e.Handled = true;
+                }
             }
             else
                 if (parent != null)
                     parent.RemoveTag(this, true); // do not raise RemoveTag event
 
             if (parent != null)
+            {
                 parent.IsEditing = false;
+                //parent.SelectedItem = this;
+            }
         }
+        /*
+        private void inputBox_DropDownClosed(object sender, RoutedPropertyChangedEventArgs<bool> e)
+        {
+            var parent = GetParent();
+            this.IsEditing = false;
+            if (parent != null)
+            {
+                parent.IsEditing = false;
+            }
+        }
+        */
+//        void inputBox_SelectionChanged(object sender, RoutedPropertyChangedEventArgs e)
+//        {
+//        }
 
         private TokenizedTagControl GetParent()
         {

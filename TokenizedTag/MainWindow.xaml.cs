@@ -29,7 +29,7 @@ namespace TokenizedTag
 
         private void TokenizedTagControl_TagClick(object sender, TokenizedTagEventArgs e)
         {
-            e.Item.IsEditing = true;
+            //e.Item.IsEditing = true;
         }
     }
 }
