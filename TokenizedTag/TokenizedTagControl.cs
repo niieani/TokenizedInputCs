@@ -2,13 +2,79 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace TokenizedTag
 {
+    [ValueConversion(typeof(bool), typeof(Visibility))]
+    public class InvertedBoolToVisibility : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool enabled = (bool)value;
+            if (enabled)
+            {
+                return Visibility.Collapsed;
+            }
+            else
+            {
+                return Visibility.Visible;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return null;
+        }
+    }
+    /*
+    public class VisibilityNotify : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public Visibility Visibility
+        {
+            get
+            {
+                return _visibility;
+            }
+            set
+            {
+                _visibility = value;
+                VisibilityChanged();
+            }
+        }
+
+        private Visibility _visibility;
+
+        protected virtual void VisibilityChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+
+    [ValueConversion(typeof(VisibilityNotify), typeof(Visibility))]
+    public class VisibilityNotifyToVisibility : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var enabled = (VisibilityNotify)value;
+            return enabled.Visibility;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return new VisibilityNotify { Visibility = (Visibility)value };
+        }
+    }
+    */
     [TemplatePart(Name = "PART_CreateTagButton", Type = typeof(Button))]
     public class TokenizedTagControl : ListBox //, INotifyPropertyChanged
     {
@@ -41,6 +107,9 @@ namespace TokenizedTag
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TokenizedTagControl), new FrameworkPropertyMetadata(typeof(TokenizedTagControl)));
         }
 
+
+        //private TextBlock _placeholderTextBlock;
+
         public TokenizedTagControl()
         {
             //// some dummy data, this needs to be provided by user
@@ -51,7 +120,6 @@ namespace TokenizedTag
                 this.AllTags = new List<string>();
 
             this.LostKeyboardFocus += TokenizedTagControl_LostKeyboardFocus;
-
             //this.ItemsSource = new List<TokenizedTagItem>() { new TokenizedTagItem("receipt"), new TokenizedTagItem("restaurant") };
             //this.AllTags = new List<string>() { "recipe", "red" };
         }
@@ -77,7 +145,7 @@ namespace TokenizedTag
                     itemToSelect = (TokenizedTagItem) this.Items.CurrentItem;
                 }
             }
-
+            
             // select the previous item
             if (!object.ReferenceEquals(itemToSelect, null))
             {
@@ -93,6 +161,21 @@ namespace TokenizedTag
         }
 
         // AllTags
+        public List<string> EnteredTags
+        {
+            get
+            {
+                if (!object.ReferenceEquals(this.ItemsSource, null) && ((List<TokenizedTagItem>)this.ItemsSource).Any())
+                {
+                    var tokenizedTagItems = (List<TokenizedTagItem>)this.ItemsSource;
+                    var typedTags = (from TokenizedTagItem item in tokenizedTagItems
+                                     select item.Text);
+                    return typedTags.ToList();
+                }
+                return new List<string>(0);
+            }
+        }
+
         public List<string> AllTags
         {
             get
@@ -123,6 +206,19 @@ namespace TokenizedTag
 
         private List<string> _allTags = new List<string>();
         public static readonly DependencyProperty AllTagsProperty = DependencyProperty.Register("AllTags", typeof(List<string>), typeof(TokenizedTagControl), new PropertyMetadata(new List<string>()));
+
+        public string Placeholder
+        {
+            get 
+            { 
+                return (string)GetValue(PlaceholderProperty); 
+            }
+            set
+            {
+                SetValue(PlaceholderProperty, value);
+            }
+        }
+        public static readonly DependencyProperty PlaceholderProperty = DependencyProperty.Register("Placeholder", typeof(string), typeof(TokenizedTagControl), new PropertyMetadata("Click here to enter tags..."));
 
         private void UpdateAllTagsProperty()
         {

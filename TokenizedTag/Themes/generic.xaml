@@ -5,7 +5,20 @@
 
     <SolidColorBrush x:Key="HighlightBrush" Color="DodgerBlue" />
 
-    <!-- EvernoteTagControl default style -->
+    <local:InvertedBoolToVisibility x:Key="InvertedBoolToVisibility"/>
+    <Grid Background="Transparent" x:Key="PlaceholderPanel" x:Shared="false" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Label Visibility="{Binding Path=HasItems, Converter={StaticResource InvertedBoolToVisibility}, RelativeSource={RelativeSource AncestorType={x:Type local:TokenizedTagControl}} }" x:Name="PART_Placeholder" Content="{Binding Path=Placeholder, RelativeSource={RelativeSource AncestorType={x:Type local:TokenizedTagControl}} }" FontSize="16" Foreground="LightGray" />
+        </StackPanel>
+    </Grid>
+    
+    <!-- TagControl default style -->
     <Style TargetType="{x:Type local:TokenizedTagControl}">
         <Style.Resources>
             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="White"/>
@@ -18,14 +31,14 @@
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="VerticalAlignment" Value="Top" />
         <Setter Property="Margin" Value="0" />
-<!--        <Setter Property="MinHeight" Value="30" />-->
+        <!--<Setter Property="MinHeight" Value="32" />-->
         <!--<Setter Property="VerticalContentAlignment" Value="Center" />-->
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:TokenizedTagControl}">
                     <Grid>
-                        <Border x:Name="PART_ControlBorder" MinHeight="28" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
+                        <Border x:Name="PART_ControlBorder" MinHeight="32" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -33,7 +46,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-                                <Button Content="" Grid.Row="0" Grid.Column="0" x:Name="PART_CreateTagButton">
+                                <Button Content="{StaticResource PlaceholderPanel}" Grid.Row="0" Grid.Column="0" x:Name="PART_CreateTagButton" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
@@ -123,7 +136,8 @@
     <!-- EvernoteTagItem default style -->
     <Style TargetType="{x:Type local:TokenizedTagItem}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="MinWidth" Value="60" />
+        <Setter Property="MinHeight" Value="26" />
+        <!--<Setter Property="MinWidth" Value="60" />-->
         <!--<Setter Property="Margin" Value="0,0,2,0" />
         <Setter Property="Padding" Value="5,2,0,2" />-->
         <Setter Property="Margin" Value="0" />
@@ -182,12 +196,28 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type local:TokenizedTagItem}">
+                            <!--<ComboBox
+                                x:Name="PART_InputBox"
+                                Margin="0"
+                                IsEditable="True"
+                                ShouldPreserveUserEnteredPrefix="True"
+                                IsTextSearchCaseSensitive="False"
+                                StaysOpenOnEdit="False"
+                                IsEnabled="True"
+                                ItemsSource="{Binding AllTags, RelativeSource={RelativeSource AncestorType={x:Type local:TokenizedTagControl}}}"
+                                Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                />-->
+                            <!-- DisplayMemberPath="Name"-->
                             <tkInput:AutoCompleteBox x:Name="PART_InputBox"
                                                      Margin="0" Padding="0 4" VerticalAlignment="Center"
                                                      Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" 
                                                      ItemsSource="{Binding AllTags, RelativeSource={RelativeSource AncestorType={x:Type local:TokenizedTagControl}}}"
-                                                     IsTextCompletionEnabled="True"
+                                                     
+                                                     IsTextCompletionEnabled="False"
+                                                     FilterMode="ContainsOrdinal"
                                                      />
+<!--                            ShouldPreserveUserEnteredPrefix="True"-->
+<!--                    IsTextSearchCaseSensitive="True"-->
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
