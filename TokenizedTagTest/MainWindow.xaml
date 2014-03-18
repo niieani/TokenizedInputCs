@@ -1,0 +1,23 @@
+﻿<Window x:Class="TokenizedTagTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525"
+        xmlns:TokenizedTag="clr-namespace:TokenizedTag;assembly=TokenizedTagExample">
+    <StackPanel>
+        <TokenizedTag:TokenizedTagControl x:Name="ProjectsControl" VerticalAlignment="Stretch" 
+                                                  Placeholder="Makin facka" IsSelectable="True" BorderBrush="LightGray" BorderThickness="1" 
+                                                  TagApplied="ProjectsControl_TagApplied" TagClick="ProjectsControl_TagClick"
+                                                  SelectionChanged="ProjectsControl_SelectionChanged"
+                                                  />
+        <TokenizedTag:TokenizedTagControl VerticalAlignment="Stretch" 
+                                                  Placeholder="Makin facka 2" BorderBrush="LightGray" BorderThickness="1" 
+                                                  />
+        <Label Content="LastApplied:"/>
+        <Label x:Name="LastApplied" Content="None"/>
+        <Label Content="LastClicked:"/>
+        <Label x:Name="LastClicked" Content="None"/>
+        <Label Content="SelectionChanged:"/>
+        <Label x:Name="SelectionChanged" Content="None"/>
+        <!-- TagClick="ProjectsControl_TagApplied" TagApplied="ProjectsControl_TagApplied" -->
+    </StackPanel>
+</Window>
